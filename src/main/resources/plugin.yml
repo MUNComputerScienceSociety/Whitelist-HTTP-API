@@ -1,0 +1,8 @@
+name: "Whitelist-HTTP-API"
+version: ${project.version}
+main: com.jackharrhy.whitelist.Whitelist
+api-version: "1.13"
+prefix: whitelist-http-api
+authors: [cheesemany]
+description: Enable Minecraft whitelist management from an exposed HTTP endpoint
+website: https://github.com/MUNComputerScienceSociety/Whitelist-HTTP-API
