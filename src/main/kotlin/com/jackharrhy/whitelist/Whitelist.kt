@@ -11,7 +11,7 @@ class Whitelist : JavaPlugin() {
         if (bearerToken.isNullOrEmpty() || bearerToken.equals("unset")) {
             logger.warning("bearer_token is unset, plugin useless!")
         } else {
-            WebServer(this, bearerToken)
+            WebServer(this)
         }
     }
 

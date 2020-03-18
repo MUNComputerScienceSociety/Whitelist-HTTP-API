@@ -1,17 +1,19 @@
 package com.jackharrhy.whitelist
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.javalin.Javalin
-import io.javalin.http.BadRequestResponse
 import io.javalin.http.UnauthorizedResponse
 import org.bukkit.Bukkit
-import java.util.*
-import kotlin.collections.HashSet
+import java.io.File
+import java.lang.Integer.parseInt
 
-class WebServer(plugin: Whitelist, bearerToken: String) {
-    private data class User(val uuid: UUID)
+
+class WebServer(plugin: Whitelist) {
+    private data class User(val name: String)
 
     init {
-        val port = 7500
+        val port = parseInt(plugin.config.getString("port"))
+        val bearerToken = plugin.config.getString("bearer_token")!!
 
         val classLoader = Thread.currentThread().contextClassLoader
         Thread.currentThread().contextClassLoader = Whitelist::class.java.classLoader
@@ -30,34 +32,27 @@ class WebServer(plugin: Whitelist, bearerToken: String) {
             }
         }
 
+        val whitelistPath = plugin.dataFolder.absolutePath + "/../../whitelist.json"
         app.get("/") { ctx ->
-            val players = HashSet<UUID>()
-            for (player in Bukkit.getWhitelistedPlayers()) {
-                players.add(player.uniqueId)
-            }
-            ctx.json(players)
+            val whitelist = File(whitelistPath).readText()
+            val mapper = ObjectMapper()
+            ctx.json(mapper.readTree(whitelist))
         }
 
         app.post("/") { ctx ->
-            val uuid = ctx.body<User>().uuid
-            val player = Bukkit.getOfflinePlayer(uuid)
-            if (player.isWhitelisted) {
-                throw BadRequestResponse("Already whitelisted!")
-            } else {
-                player.isWhitelisted = true
-                ctx.status(201).result("")
+            val name = ctx.body<User>().name
+            Bukkit.getScheduler().callSyncMethod(plugin) {
+                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "whitelist add $name")
             }
+            ctx.status(201).result("")
         }
 
         app.delete("/") { ctx ->
-            val uuid = ctx.body<User>().uuid
-            val player = Bukkit.getOfflinePlayer(uuid)
-            if (player.isWhitelisted) {
-                player.isWhitelisted = false
-                ctx.status(201).result("")
-            } else {
-                throw BadRequestResponse("Not whitelisted!")
+            val name = ctx.body<User>().name
+            Bukkit.getScheduler().callSyncMethod(plugin) {
+                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "whitelist remove $name")
             }
+            ctx.status(201).result("")
         }
 
         plugin.logger.info("WebServer now running on port $port")
