@@ -5,7 +5,9 @@ Enable Minecraft whitelist management from an exposed HTTP endpoint
 ---
 
 `GET / -> [] of {uuid: "...", name: "..."}` - Returns the `whitelist.json` of the server.
+
 `POST / ({name: "..."}) -> 201` - Adds a user to the whitelist via username.
+
 `DELETE / ({name: "..."}) -> 201` - Removes a user from the whitelist via username.
 
 ---
