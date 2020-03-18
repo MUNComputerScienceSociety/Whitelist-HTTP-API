@@ -1,5 +1,5 @@
 # Whitelist HTTP API
 
-Enable whitelist management from an exposed HTTP endpoint
+Enable Minecraft whitelist management from an exposed HTTP endpoint
 
 _wip_
